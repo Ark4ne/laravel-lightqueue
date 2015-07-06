@@ -2,8 +2,6 @@
 
 namespace Ark4ne\LightQueue;
 
-use BadMethodCallException;
-
 class FileQueue
 {
     /**

@@ -5,8 +5,14 @@ namespace Ark4ne\LightQueue;
 class LightQueueManager
 {
 
+    /**
+     * @var LightQueueManager
+     */
     private static $_instance = null;
 
+    /**
+     * @return LightQueueManager
+     */
     public static function instance()
     {
         if (self::$_instance == null) {

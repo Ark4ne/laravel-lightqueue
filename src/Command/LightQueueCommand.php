@@ -1,8 +1,7 @@
 <?php
 namespace Ark4ne\LightQueue;
 
-use \Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputArgument;
+use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 
 class LightQueueCommand extends Command
@@ -44,6 +43,12 @@ class LightQueueCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Check if data
+     *
+     * @param $cmd
+     * @return bool
+     */
     private function isValidCmd($cmd)
     {
         try {
