@@ -25,9 +25,12 @@ class FileQueue
      */
     private $_handle;
 
-    private function __construct()
+    /**
+     * @param string $file_queue_name Name of queue
+     */
+    public function __construct($file_queue_name = 'process')
     {
-        $this->_file_path = storage_path() . '/logs/process.queue';
+        $this->_file_path = storage_path() . "/logs/$file_queue_name.queue";
     }
 
     /**
@@ -153,48 +156,4 @@ class FileQueue
 
         return $line;
     }
-
-    /**
-     * @var FileQueue
-     */
-    private static $_instance = null;
-
-    /**
-     * @return FileQueue
-     */
-    private static function _instance()
-    {
-        if (static::$_instance == null) {
-            static::$_instance = new LightQueueException();
-        }
-
-        return static::$_instance;
-    }
-
-    /**
-     * @param $method
-     * @param $args
-     * @return mixed
-     */
-    public static function __callStatic($method, $args)
-    {
-        $instance = static::_instance();
-        switch ($method) {
-            case 'push':
-            case 'next':
-            case 'hasNext':
-                break;
-            default:
-                throw new BadMethodCallException("FQueue:__callStatic:$method");
-        }
-        switch (count($args)) {
-            case 0:
-                return $instance->$method();
-            case 1:
-                return $instance->$method($args[0]);
-            default:
-                return call_user_func_array(array($instance, $method), $args);
-        }
-    }
-
 }
