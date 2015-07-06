@@ -1,5 +1,8 @@
+/app
+/bootstrap
 /vendor
 /.idea
+phpunit.phar
 composer.phar
 composer.lock
 .env.*.php

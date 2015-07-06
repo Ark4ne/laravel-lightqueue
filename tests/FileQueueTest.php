@@ -17,12 +17,19 @@ class FileQueueTest extends PHPUnit_Framework_TestCase
 
         $string_test = "string_test";
 
-        $this->assertTrue($fileQueue->push($string_test), '$fileQueue->push');
+        $this->assertEquals(0, $fileQueue->fileSize());
 
-        $this->assertTrue($fileQueue->hasNext(), '$fileQueue->hasNext');
+        $this->assertTrue($fileQueue->push($string_test));
 
-        $this->assertEquals($string_test, $fileQueue->next(), '$fileQueue->next');
+        $this->assertEquals(13, $fileQueue->fileSize());
 
-        $this->assertFalse($fileQueue->hasNext(), '$fileQueue->hasNext');
+        $this->assertTrue($fileQueue->hasNext());
+
+        $this->assertEquals($string_test, $fileQueue->next());
+
+        $this->assertEquals(0, $fileQueue->fileSize());
+
+        $this->assertFalse($fileQueue->hasNext());
     }
 }
+
