@@ -43,7 +43,7 @@ class LightQueueCommand extends Command
             if ($job instanceof LightQueueCommandInterface)
                 $job->fire($queueCmd->data);
             else
-                throw new LightQueueException("$queueCmd->job not implement LightQueueCommandInterface");
+                throw new LightQueueException("{$queueCmd->job} not implement LightQueueCommandInterface");
         }
     }
 
