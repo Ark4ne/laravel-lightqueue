@@ -8,7 +8,4 @@ php:
 
 before_script:
   - composer self-update
-  - travis_retry composer install --no-interaction --prefer-source
-
-script:
-  - mkdir -p build/logs
+  - composer install --no-interaction --prefer-source --dev
