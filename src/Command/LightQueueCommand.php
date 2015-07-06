@@ -80,7 +80,7 @@ class LightQueueCommand extends Command
 
     public function __destruct()
     {
-        LightQueueManager::instance()->jobDestruct($this->cmd->queue);
+        LightQueueManager::instance()->jobDestruct($this->queue);
     }
 
     /**
