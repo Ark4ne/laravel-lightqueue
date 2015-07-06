@@ -2,6 +2,8 @@
 namespace Ark4ne\LightQueue;
 
 use \Illuminate\Console\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 class LightQueueCommand extends Command
 {
@@ -21,11 +23,37 @@ class LightQueueCommand extends Command
     protected $description = 'LightQueue: Execution next command in queue';
 
     /**
+     * Name of current queue.
+     *
+     * @var string
+     */
+    private $queue;
+
+    /**
+     * Job Object
+     *
+     * @var object
+     */
+    private $cmd;
+
+    /**
      * Create a new command instance.
      */
     public function __construct()
     {
         parent::__construct();
+    }
+
+    private function isValidCmd($cmd)
+    {
+        try {
+            if (!is_null($cmd) && is_string($cmd->job)) {
+                return true;
+            }
+        } catch (\Exception $e) {
+
+        }
+        return false;
     }
 
     /**
@@ -36,20 +64,23 @@ class LightQueueCommand extends Command
      */
     public function fire()
     {
-        $queueCmd = LightQueueManager::instance()->nextQueue();
-        if (!is_null($queueCmd) && isset($queueCmd->job)) {
-            $job = new $queueCmd->job();
+        $this->queue = $this->option('queue');
+
+        $this->cmd = LightQueueManager::instance()->nextQueue($this->queue);
+
+        if ($this->isValidCmd($this->cmd)) {
+            $job = new $this->cmd->job();
 
             if ($job instanceof LightQueueCommandInterface)
-                $job->fire($queueCmd->data);
+                $job->fire($this->cmd->data);
             else
-                throw new LightQueueException("{$queueCmd->job} not implement LightQueueCommandInterface");
+                throw new LightQueueException("{$this->cmd->job} not implement LightQueueCommandInterface");
         }
     }
 
     public function __destruct()
     {
-        LightQueueManager::instance()->deleteProcess();
+        LightQueueManager::instance()->jobDestruct($this->cmd->queue);
     }
 
     /**
@@ -69,6 +100,6 @@ class LightQueueCommand extends Command
      */
     protected function getOptions()
     {
-        return [];
+        return [['queue', 'q', InputOption::VALUE_OPTIONAL, 'Queue name', null]];
     }
 }

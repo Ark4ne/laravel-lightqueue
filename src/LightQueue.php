@@ -16,7 +16,7 @@ class LightQueue implements QueueInterface{
      */
     public function push($job, $data = '', $queue = null)
     {
-        LightQueueManager::instance()->pushQueue($job, $data);
+        LightQueueManager::instance()->pushQueue($job, $data, $queue);
     }
 
     /**
@@ -43,7 +43,7 @@ class LightQueue implements QueueInterface{
      */
     public function later($delay, $job, $data = '', $queue = null)
     {
-        LightQueueManager::instance()->pushQueue($job, $data);
+        LightQueueManager::instance()->pushQueue($job, $data, $queue);
     }
 
     /**
@@ -54,7 +54,7 @@ class LightQueue implements QueueInterface{
      */
     public function pop($queue = null)
     {
-        LightQueueManager::instance()->nextQueue();
+        LightQueueManager::instance()->nextQueue($queue);
     }
 
 

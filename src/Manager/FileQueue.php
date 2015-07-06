@@ -28,7 +28,7 @@ class FileQueue
     /**
      * @param string $file_queue_name Name of queue
      */
-    public function __construct($file_queue_name = 'process')
+    public function __construct($file_queue_name)
     {
         $this->_file_path = storage_path() . "/logs/$file_queue_name.queue";
     }
@@ -41,6 +41,7 @@ class FileQueue
      */
     private function _fHandle()
     {
+        $wouldblock = true;
         $this->_handle = fopen($this->_file_path, "c+");
         if ($this->_handle) {
             while (!flock($this->_handle, LOCK_EX | LOCK_SH, $wouldblock)) {
@@ -63,13 +64,14 @@ class FileQueue
      */
     private function _fClose()
     {
+        $wouldblock = true;
         if ($this->_f_open) {
             while (!flock($this->_handle, LOCK_UN, $wouldblock)) {
                 if (!$wouldblock)
                     throw new LightQueueException("FileQueue::_fClose: Can't unlock queue file !");
                 usleep(10);
             }
-            if(!fclose($this->_handle)){
+            if (!fclose($this->_handle)) {
                 throw new LightQueueException("FileQueue::_fClose: Can't close queue file");
             }
 
@@ -83,11 +85,7 @@ class FileQueue
     public function __destruct()
     {
         if ($this->_f_open)
-            try {
-                $this->_fClose();
-            } catch (\Exception $e) {
-
-            }
+            @$this->_fClose();
     }
 
     /**
@@ -150,7 +148,7 @@ class FileQueue
                     $this->_fClose();
                 }
             }
-        } catch (LightQueueException $lqe) {
+        } catch (\Exception $lqe) {
             $line = '';
         }
 
