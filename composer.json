@@ -20,7 +20,6 @@
     "illuminate/queue": "~4.0"
   },
   "require-dev": {
-    "laravel/framework": "4.2.*",
     "phpunit/phpunit": "~4.0",
     "satooshi/php-coveralls": "~0.6"
   },
