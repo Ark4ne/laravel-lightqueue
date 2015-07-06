@@ -185,7 +185,7 @@ class FileQueue
             case 'hasNext':
                 break;
             default:
-                throw new \BadMethodCallException("FQueue:__callStatic:$method");
+                throw new BadMethodCallException("FQueue:__callStatic:$method");
         }
         switch (count($args)) {
             case 0:
