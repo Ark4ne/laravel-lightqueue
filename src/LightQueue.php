@@ -25,6 +25,7 @@ class LightQueue implements QueueInterface
      * @param  string $job
      * @param  mixed $data
      * @param  string $queue
+     *
      * @return mixed
      */
     public function push($job, $data = null, $queue = null)
@@ -38,6 +39,7 @@ class LightQueue implements QueueInterface
      * @param  string $payload
      * @param  string $queue
      * @param  array $options
+     *
      * @return mixed
      */
     public function pushRaw($payload, $queue = null, array $options = array())
@@ -52,6 +54,7 @@ class LightQueue implements QueueInterface
      * @param  string $job
      * @param  mixed $data
      * @param  string $queue
+     *
      * @return mixed
      */
     public function later($delay, $job, $data = '', $queue = null)
@@ -63,6 +66,7 @@ class LightQueue implements QueueInterface
      * Pop the next job off of the queue.
      *
      * @param  string $queue
+     *
      * @return \Illuminate\Queue\Jobs\Job|null
      */
     public function pop($queue = null)
@@ -74,8 +78,9 @@ class LightQueue implements QueueInterface
 
     public static function instance()
     {
-        if (self::$_i == null)
+        if (self::$_i == null) {
             self::$_i = new LightQueue();
+        }
 
         return self::$_i;
     }

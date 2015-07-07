@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Config;
 
 class LightQueueManager
 {
-
     /**
      * @var LightQueueManager
      */
@@ -17,12 +16,13 @@ class LightQueueManager
 
     /**
      * @param null $driver
+     *
      * @return LightQueueManager
      */
     public static function instance($driver = null)
     {
         if (self::$_instance == null) {
-            self::$_instance = new LightQueueManager(!$driver ? Config::get('queue.lightqueue.driver') : $driver);
+            self::$_instance = new self(!$driver ? Config::get('queue.lightqueue.driver') : $driver);
         }
         return self::$_instance;
     }
@@ -41,6 +41,7 @@ class LightQueueManager
      * @var string
      */
     private $driver;
+
     /**
      * @var array
      */
@@ -97,14 +98,15 @@ class LightQueueManager
      */
     private function queue($queue = null)
     {
-        if (is_null($queue))
+        if (is_null($queue)) {
             $queue = $this->queue;
-        else
+        } else {
             $this->queue = $queue;
+        }
 
-        if (!array_key_exists($this->driver . $queue, $this->fileQueues))
+        if (!array_key_exists($this->driver . $queue, $this->fileQueues)) {
             $this->fileQueues[$this->driver . $queue] = $this->provider($queue);
-
+        }
 
         return $this->fileQueues[$this->driver . $queue];
     }
@@ -133,7 +135,7 @@ class LightQueueManager
         }
         try {
             $this->queue($queue)->push(json_encode([
-                'job' => $job,
+                'job'  => $job,
                 'data' => $data,
             ]));
             $this->createProcess($queue);
@@ -146,6 +148,7 @@ class LightQueueManager
      * Get the next onto the queue.
      *
      * @param null $queue
+     *
      * @return mixed|null
      */
     public function nextQueue($queue = null)
@@ -161,6 +164,7 @@ class LightQueueManager
                 return $queueCmd;
             }
         }
+
         return null;
     }
 
@@ -173,6 +177,7 @@ class LightQueueManager
      * Launch new job if the number of active processes is under maximum MAX_JOB_THREAD.
      *
      * @param null|string $queue
+     *
      * @return bool
      */
     public function createProcess($queue)
@@ -191,7 +196,8 @@ class LightQueueManager
      */
     public function jobDestruct($queue)
     {
-        if ($this->queue($queue)->hasNext())
+        if ($this->queue($queue)->hasNext()){
             $this->createProcess($queue);
+        }
     }
 }

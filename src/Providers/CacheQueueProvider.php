@@ -1,20 +1,12 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Guillaume
- * Date: 07/07/2015
- * Time: 05:32
- */
 
 namespace Ark4ne\LightQueue\Provider;
-
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 class CacheQueueProvider implements ProviderInterface
 {
-
     private $queue;
     private $queue_name;
     private $md5_queue;
@@ -30,6 +22,7 @@ class CacheQueueProvider implements ProviderInterface
     public function getQueue()
     {
         $this->queue == null && $this->queue = json_decode(Cache::get($this->md5_queue, '[]'));
+
         return $this->queue;
     }
 
@@ -47,9 +40,10 @@ class CacheQueueProvider implements ProviderInterface
     }
 
     /**
-     * Push Command to queue
+     * Push Command to queue.
      *
      * @param $cmd
+     *
      * @return bool
      */
     public function push($cmd)
@@ -64,8 +58,6 @@ class CacheQueueProvider implements ProviderInterface
     }
 
     /**
-     *
-     *
      * @return int
      */
     public function queueSize()
@@ -74,7 +66,7 @@ class CacheQueueProvider implements ProviderInterface
     }
 
     /**
-     * Check if queue has command
+     * Check if queue has command.
      *
      * @return bool
      */
@@ -84,7 +76,7 @@ class CacheQueueProvider implements ProviderInterface
     }
 
     /**
-     * Get the next command in queue
+     * Get the next command in queue.
      *
      * @return string
      */
@@ -100,6 +92,7 @@ class CacheQueueProvider implements ProviderInterface
 
             return $cmd;
         }
+
         return null;
     }
 }

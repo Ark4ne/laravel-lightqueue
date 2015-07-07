@@ -29,6 +29,7 @@ class FileLockable
 
     /**
      * @param $path string
+     *
      * @throws LightQueueException
      */
     public function __construct($path)
@@ -39,28 +40,31 @@ class FileLockable
 
         if (!file_exists($this->path)) {
             $handle = @fopen($this->path, 'w');
-            if (!$handle)
+            if (!$handle) {
                 throw new LightQueueException("FileLockable::__construct: Can't create queue file");
+            }
 
             fclose($handle);
         }
     }
 
     /**
-     * Call flock for handle
+     * Call flock for handle.
      *
      * @param $option
+     *
      * @throws LightQueueException
      */
     private function _flock($option)
     {
         $try = 0;
-        $maxTry = 8;
+        $maxTry = 25;
 
         $wouldblock = true;
         while (!flock($this->handle, $option | LOCK_NB, $wouldblock)) {
-            if (($try > $maxTry) || !$wouldblock)
+            if (($try > $maxTry) || !$wouldblock) {
                 throw new LightQueueException("FileLockable::_flock: Can't got lock for queue file !");
+            }
             usleep(10);
             $try++;
         }
@@ -69,7 +73,7 @@ class FileLockable
     public function handle()
     {
         if (!$this->isOpen()) {
-            $this->handle = @fopen($this->path, "c+");
+            $this->handle = @fopen($this->path, 'c+');
             if ($this->handle) {
                 $this->open = true;
                 return $this->handle;
@@ -83,7 +87,7 @@ class FileLockable
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isLock()
     {
@@ -91,7 +95,7 @@ class FileLockable
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isOpen()
     {
@@ -99,7 +103,7 @@ class FileLockable
     }
 
     /**
-     * Lock handle
+     * Lock handle.
      *
      * @throws LightQueueException
      */
@@ -112,11 +116,12 @@ class FileLockable
 
             return true;
         }
+
         return false;
     }
 
     /**
-     * UnLock handle
+     * UnLock handle.
      *
      * @throws LightQueueException
      */
@@ -126,8 +131,10 @@ class FileLockable
             $this->_flock(LOCK_UN);
 
             $this->lock = false;
+
             return true;
         }
+
         return false;
     }
 
@@ -141,15 +148,16 @@ class FileLockable
         if ($this->isOpen()) {
             $this->unlock();
 
-            if (!fclose($this->handle))
+            if (!fclose($this->handle)) {
                 throw new LightQueueException("FileLockable::_fClose: Can't close queue file");
+            }
 
             $this->open = false;
         }
     }
 
     /**
-     *  Close handle if is already open
+     *  Close handle if is already open.
      */
     public function __destruct()
     {
@@ -166,6 +174,7 @@ class FileQueueProvider implements ProviderInterface
 
     /**
      * @param string $file_queue_name Name of queue
+     *
      * @throws LightQueueException
      */
     public function __construct($file_queue_name)
@@ -174,7 +183,7 @@ class FileQueueProvider implements ProviderInterface
     }
 
     /**
-     * Get size of queue
+     * Get size of queue.
      *
      * @return int
      */
@@ -184,7 +193,7 @@ class FileQueueProvider implements ProviderInterface
     }
 
     /**
-     *  Close handle if is already open
+     *  Close handle if is already open.
      */
     public function __destruct()
     {
@@ -192,9 +201,10 @@ class FileQueueProvider implements ProviderInterface
     }
 
     /**
-     * Push Command to queue
+     * Push Command to queue.
      *
      * @param $cmd
+     *
      * @return bool
      */
     public function push($cmd)
@@ -216,7 +226,7 @@ class FileQueueProvider implements ProviderInterface
     }
 
     /**
-     * Check if queue has command
+     * Check if queue has command.
      *
      * @return bool
      */
@@ -227,7 +237,7 @@ class FileQueueProvider implements ProviderInterface
 
 
     /**
-     * Get the next command in queue
+     * Get the next command in queue.
      *
      * @return string
      */
@@ -244,8 +254,9 @@ class FileQueueProvider implements ProviderInterface
                     for ($i = 1, $lenght = count($lines); $i < $lenght; $i++) {
                         $_line = $lines[$i] . PHP_EOL;
                         $_l_line = strlen($_line);
-                        if ($_l_line)
+                        if ($_l_line) {
                             fwrite($this->file->handle(), $_line, $_l_line);
+                        }
                     }
 
                     fflush($this->file->handle());

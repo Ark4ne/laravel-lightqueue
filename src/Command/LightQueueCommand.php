@@ -1,4 +1,5 @@
 <?php
+
 namespace Ark4ne\LightQueue\Command;
 
 use Ark4ne\LightQueue\Exception\LightQueueException;
@@ -8,7 +9,6 @@ use Symfony\Component\Console\Input\InputOption;
 
 class LightQueueCommand extends Command
 {
-
     /**
      * The console command name.
      *
@@ -31,7 +31,7 @@ class LightQueueCommand extends Command
     private $queue;
 
     /**
-     * Job Object
+     * Job Object.
      *
      * @var object
      */
@@ -46,9 +46,10 @@ class LightQueueCommand extends Command
     }
 
     /**
-     * Check if data
+     * Check if cmd is valid.
      *
      * @param $cmd
+     *
      * @return bool
      */
     private function isValidCmd($cmd)
@@ -67,23 +68,28 @@ class LightQueueCommand extends Command
      * Execute the console command.
      *
      * @throws LightQueueException
+     *
      * @return mixed
      */
     public function fire()
     {
         $this->queue = @$this->option('queue');
-        if (!$this->queue) $this->queue = 'process';
+        if (!$this->queue) {
+            $this->queue = 'process';
+        }
         $this->cmd = LightQueueManager::instance()->nextQueue($this->queue);
 
         if ($this->isValidCmd($this->cmd)) {
             $job = new $this->cmd->job();
 
-            if ($job instanceof LightQueueCommandInterface)
+            if ($job instanceof LightQueueCommandInterface) {
                 $job->fire($this, $this->cmd->data);
-            else
+            } else {
                 throw new LightQueueException("{$this->cmd->job} not implement LightQueueCommandInterface");
-        } else
+            }
+        } else {
             throw new LightQueueException("LightQueueCommand data invalid");
+        }
     }
 
     public function __destruct()
