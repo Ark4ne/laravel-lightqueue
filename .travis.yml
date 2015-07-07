@@ -10,4 +10,4 @@ before_script:
   - composer update --no-interaction --prefer-source --dev
   - composer dump-autoload -o
 script:
-  - phpunit --bootstrap ./phpunit.php --configuration ./phpunit.xml
+  - phpunit --bootstrap ./tests/bootstrap.php --configuration ./phpunit.xml

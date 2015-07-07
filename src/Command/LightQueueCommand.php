@@ -1,6 +1,8 @@
 <?php
-namespace Ark4ne\LightQueue;
+namespace Ark4ne\LightQueue\Command;
 
+use Ark4ne\LightQueue\Exception\LightQueueException;
+use Ark4ne\LightQueue\Manager\LightQueueManager;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -77,7 +79,7 @@ class LightQueueCommand extends Command
             $job = new $this->cmd->job();
 
             if ($job instanceof LightQueueCommandInterface)
-                $job->fire($this->cmd->data);
+                $job->fire($this, $this->cmd->data);
             else
                 throw new LightQueueException("{$this->cmd->job} not implement LightQueueCommandInterface");
         }
@@ -105,6 +107,6 @@ class LightQueueCommand extends Command
      */
     protected function getOptions()
     {
-        return [['queue',null, InputOption::VALUE_OPTIONAL, 'Queue name', null]];
+        return [['queue', null, InputOption::VALUE_OPTIONAL, 'Queue name', null]];
     }
 }

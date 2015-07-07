@@ -1,9 +1,10 @@
 <?php
 
-namespace Ark4ne\LightQueue;
+namespace Ark4ne\LightQueue\Manager;
 
 use Ark4ne\LightQueue\Provider\CacheQueueProvider;
 use Ark4ne\LightQueue\Provider\FileQueueProvider;
+use Ark4ne\LightQueue\Provider\ProviderInterface;
 use Illuminate\Support\Facades\Config;
 
 class LightQueueManager
@@ -76,7 +77,7 @@ class LightQueueManager
      *
      * @param null|string $queue
      *
-     * @return FileQueueProvider
+     * @return ProviderInterface
      */
     private function queue($queue = null)
     {
@@ -147,6 +148,9 @@ class LightQueueManager
         return null;
     }
 
+    public function queueSize($queue){
+        return $this->queue($queue)->queueSize();
+    }
     /**
      * Launch new job if the number of active processes is under maximum MAX_JOB_THREAD.
      *

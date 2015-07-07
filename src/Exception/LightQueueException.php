@@ -1,6 +1,6 @@
 <?php
 
-namespace Ark4ne\LightQueue;
+namespace Ark4ne\LightQueue\Exception;
 
 class LightQueueException extends \Exception
 {

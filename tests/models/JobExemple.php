@@ -6,16 +6,18 @@
  * Time: 05:09
  */
 
-class JobExemple implements Ark4ne\LightQueue\LightQueueCommandInterface {
+class JobExemple implements Ark4ne\LightQueue\Command\LightQueueCommandInterface {
 
     /**
      * Execute the commands
      *
-     * @param $data
+     * @param $job object
+     * @param $data mixed
      * @return mixed
+     * @throws Exception
      */
-    public function fire($data)
+    public function fire($job, $data)
     {
-        throw new \Exception('JobExemple::fire');
+        $job->info(json_encode($data));
     }
 }

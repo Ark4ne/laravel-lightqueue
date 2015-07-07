@@ -2,6 +2,7 @@
 
 namespace Ark4ne\LightQueue;
 
+use Ark4ne\LightQueue\Manager\LightQueueManager;
 use Illuminate\Queue\QueueInterface;
 
 class LightQueue implements QueueInterface
