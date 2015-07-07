@@ -82,7 +82,7 @@ class LightQueueManager
                 'job' => $job,
                 'data' => $data,
             ]));
-            $this->createProcess();
+            $this->createProcess($queue);
         } catch (\Exception $e) {
 
         }
@@ -112,20 +112,24 @@ class LightQueueManager
 
     /**
      * Launch new job if the number of active processes is under maximum MAX_JOB_THREAD.
+     *
+     * @param null|string $queue
      */
-    public function createProcess()
+    public function createProcess($queue)
     {
         if ($this->getActiveProcess() < 8) {
-            exec("php " . base_path() . "/artisan lq:exec > /dev/null &");
+            exec('php ' . base_path() . '/artisan lq:exec --queue="'.$queue.'"> /dev/null &');
         }
     }
 
     /**
      * Handle end of a job.
+     *
+     * @param null|string $queue
      */
-    public function jobDestruct($queue = null)
+    public function jobDestruct($queue)
     {
         if ($this->queue($queue)->hasNext())
-            $this->createProcess();
+            $this->createProcess($queue);
     }
 }

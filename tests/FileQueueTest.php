@@ -8,17 +8,7 @@
 
 use Ark4ne\LightQueue\FileQueue;
 
-if(!function_exists('storage_path')){
-    function storage_path(){
-        return '';
-    }
-}
-if(!function_exists('base_path')){
-    function base_path(){
-        return '';
-    }
-}
-class FileQueueTest extends PHPUnit_Framework_TestCase
+class FileQueueTest extends TestCase
 {
 
     public function testCreate()

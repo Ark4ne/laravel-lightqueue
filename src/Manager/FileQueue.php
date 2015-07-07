@@ -2,6 +2,8 @@
 
 namespace Ark4ne\LightQueue;
 
+use Illuminate\Support\Facades\Config;
+
 class FileQueue
 {
     /**
@@ -25,10 +27,19 @@ class FileQueue
 
     /**
      * @param string $file_queue_name Name of queue
+     * @throws LightQueueException
      */
     public function __construct($file_queue_name)
     {
-        $this->_file_path = storage_path() . "/logs/$file_queue_name.queue";
+        $this->_file_path = Config::get('queue.lightqueue.queue_directory') . "$file_queue_name.queue";
+
+        if(!file_exists($this->_file_path)){
+            $handle = fopen($this->_file_path, 'w');
+            if(!$handle){
+                throw new LightQueueException("FileQueue::__construct: Can't create queue file");
+            }
+            fclose($handle);
+        }
     }
 
     /**
@@ -117,7 +128,18 @@ class FileQueue
      */
     public function hasNext()
     {
-        return filesize($this->_file_path) > 1;
+        return $this->fileSize($this->_file_path) > 1;
+    }
+
+    /**
+     * Check if queue has command
+     *
+     * @return bool
+     */
+    public function fileSize()
+    {
+        clearstatcache();
+        return filesize($this->_file_path);
     }
 
     /**
