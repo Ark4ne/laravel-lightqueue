@@ -2,14 +2,19 @@
 
 use Ark4ne\LightQueue\LightQueue;
 use Ark4ne\LightQueue\Manager\LightQueueManager;
-use Ark4ne\LightQueue\Exception\LightQueueException;
 use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\Console\Output\BufferedOutput;
 
-class LightQueueCacheTest extends TestCase
+abstract class LQManagerTester extends TestCase
 {
+    /**
+     * @return mixed
+     */
+    protected abstract function setUpConfig();
 
-    private $queueName = "process";
+    protected $driver;
+
+    protected $queueName;
 
     public function setUp()
     {
@@ -17,8 +22,11 @@ class LightQueueCacheTest extends TestCase
 
         Artisan::add(new \Ark4ne\LightQueue\Command\LightQueueCommand());
 
-        LightQueueManager::instance()->setDriver('cache');
+        $this->setUpConfig();
+
+        LightQueueManager::instance($this->driver)->setDriver($this->driver);
     }
+
 
     public function builderTestPush($_func_lightQueue, $jobName)
     {
@@ -85,20 +93,49 @@ class LightQueueCacheTest extends TestCase
     public function testExceptionJob()
     {
         $job = 'JobError';
-        LightQueue::instance()->push($job, ['data' => 'test'], '');
-        $this->assertEquals(1, LightQueueManager::instance()->queueSize(''));
+        LightQueue::instance()->push($job, ['data' => 'test'], $this->queueName);
+        $this->assertEquals(1, LightQueueManager::instance()->queueSize($this->queueName));
+
         $output = new BufferedOutput();
-        $this->setExpectedException('Ark4ne\LightQueue\Exception\LightQueueException');
+        $this->setExpectedException('Ark4ne\LightQueue\Exception\LightQueueException', 'JobError not implement LightQueueCommandInterface');
         Artisan::call('lq:exec', [], $output);
-        $LightQueueException = false;
-        try {
-            $response = $output->fetch();
-        } catch (LightQueueException $e) {
-            $LightQueueException = true;
-            $this->assertEquals('JobError not implement LightQueueCommandInterface', $e->getMessage());
-            $response = null;
+
+        $output->fetch();
+    }
+
+    public function testNullQueueName()
+    {
+        LightQueueManager::instance()->pushQueue('JobValid', 'DataQueueNull');
+
+        $this->assertEquals((object)[
+            'job' => 'JobValid',
+            'data' => 'DataQueueNull',
+            'queue' => 'process'], LightQueueManager::instance()->nextQueue());
+    }
+
+    public function testNullNextQueue()
+    {
+        $this->assertNull(LightQueueManager::instance()->nextQueue());
+
+        switch ($this->driver) {
+            case 'file':
+                $provider = new \Ark4ne\LightQueue\Provider\FileQueueProvider($this->queueName);
+                break;
+            case 'cache':
+            default:
+                $provider = new \Ark4ne\LightQueue\Provider\CacheQueueProvider($this->queueName);
+                break;
         }
-        $this->assertEquals(true, $LightQueueException);
-        $this->assertEquals(null, $response);
+
+        $provider->push('dezzfzfz');
+
+        $this->assertNull(LightQueueManager::instance()->nextQueue());
+    }
+
+    public function testExec()
+    {
+        $this->assertNull(LightQueueManager::instance()->nextQueue());
+
+        $this->assertFalse(LightQueueManager::instance()->createProcess(null));
     }
 }

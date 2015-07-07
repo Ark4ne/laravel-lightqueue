@@ -1,0 +1,106 @@
+<?php
+
+/**
+ * Created by PhpStorm.
+ * User: Guillaume
+ * Date: 07/07/2015
+ * Time: 21:02
+ */
+class OConsole implements Symfony\Component\Console\Output\OutputInterface
+{
+    /**
+     * Writes a message to the output.
+     *
+     * @param string|array $messages The message as an array of lines or a single string
+     * @param bool $newline Whether to add a newline
+     * @param int $type The type of output (one of the OUTPUT constants)
+     *
+     * @throws \InvalidArgumentException When unknown output type is given
+     *
+     * @api
+     */
+    public function write($messages, $newline = false, $type = self::OUTPUT_NORMAL)
+    {
+    }
+
+    /**
+     * Writes a message to the output and adds a newline at the end.
+     *
+     * @param string|array $messages The message as an array of lines of a single string
+     * @param int $type The type of output (one of the OUTPUT constants)
+     *
+     * @throws \InvalidArgumentException When unknown output type is given
+     *
+     * @api
+     */
+    public function writeln($messages, $type = self::OUTPUT_NORMAL)
+    {
+    }
+
+    /**
+     * Sets the verbosity of the output.
+     *
+     * @param int $level The level of verbosity (one of the VERBOSITY constants)
+     *
+     * @api
+     */
+    public function setVerbosity($level)
+    {
+    }
+
+    /**
+     * Gets the current verbosity of the output.
+     *
+     * @return int The current level of verbosity (one of the VERBOSITY constants)
+     *
+     * @api
+     */
+    public function getVerbosity()
+    {
+    }
+
+    /**
+     * Sets the decorated flag.
+     *
+     * @param bool $decorated Whether to decorate the messages
+     *
+     * @api
+     */
+    public function setDecorated($decorated)
+    {
+    }
+
+    /**
+     * Gets the decorated flag.
+     *
+     * @return bool true if the output will decorate messages, false otherwise
+     *
+     * @api
+     */
+    public function isDecorated()
+    {
+    }
+
+    /**
+     * Sets output formatter.
+     *
+     * @param \Symfony\Component\Console\Formatter\OutputFormatterInterface $formatter
+     *
+     * @api
+     */
+    public function setFormatter(\Symfony\Component\Console\Formatter\OutputFormatterInterface $formatter)
+    {
+    }
+
+    /**
+     * Returns current output formatter instance.
+     *
+     * @return \Symfony\Component\Console\Formatter\OutputFormatterInterface
+     *
+     * @api
+     */
+    public function getFormatter()
+    {
+    }
+
+}

@@ -32,7 +32,7 @@ class FileQueueProvider implements ProviderInterface
      */
     public function __construct($file_queue_name)
     {
-        $this->_file_path = Config::get('queue.lightqueue.queue_directory') . "$file_queue_name.queue";
+        $this->_file_path = Config::get('queue.lightqueue.queue_directory') . md5($file_queue_name).".queue";
 
         if (!file_exists($this->_file_path)) {
             $handle = @fopen($this->_file_path, 'w');
@@ -155,7 +155,7 @@ class FileQueueProvider implements ProviderInterface
      */
     public function next()
     {
-        $line = '';
+        $line = null;
         try {
             $lines = file($this->_file_path, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
             if (count($lines) > 0) {
@@ -175,7 +175,7 @@ class FileQueueProvider implements ProviderInterface
                 }
             }
         } catch (\Exception $lqe) {
-            $line = '';
+            $line = null;
         }
 
         return $line;

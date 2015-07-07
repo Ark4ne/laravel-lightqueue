@@ -16,12 +16,13 @@ class LightQueueManager
     private static $_instance = null;
 
     /**
+     * @param null $driver
      * @return LightQueueManager
      */
-    public static function instance()
+    public static function instance($driver = null)
     {
         if (self::$_instance == null) {
-            self::$_instance = new LightQueueManager();
+            self::$_instance = new LightQueueManager(!$driver ? Config::get('queue.lightqueue.driver') : $driver);
         }
         return self::$_instance;
     }
@@ -45,18 +46,10 @@ class LightQueueManager
      */
     private $fileQueues = [];
 
-    private function __construct()
+    private function __construct($driver)
     {
         $this->max_processes = Config::get('queue.lightqueue.processes.max_by_queue');
-        switch (Config::get('queue.lightqueue.driver')) {
-            case 'file':
-                $this->driver = 'file';
-                break;
-            case 'cache':
-            default:
-                $this->driver = 'cache';
-                break;
-        }
+        $this->setDriver($driver);
     }
 
     public function setDriver($driver)
@@ -172,12 +165,15 @@ class LightQueueManager
      * Launch new job if the number of active processes is under maximum MAX_JOB_THREAD.
      *
      * @param null|string $queue
+     * @return bool
      */
     public function createProcess($queue)
     {
         if ($this->getActiveProcess() < $this->max_processes) {
             exec('php ' . base_path() . '/artisan lq:exec --queue="' . $queue . '"> /dev/null &');
+            return true;
         }
+        return false;
     }
 
     /**
