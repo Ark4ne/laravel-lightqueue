@@ -9,3 +9,4 @@ php:
 before_script:
   - composer self-update
   - composer update --no-interaction --prefer-source --dev
+  - composer dump-autoload -o
