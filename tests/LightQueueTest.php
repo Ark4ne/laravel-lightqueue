@@ -34,7 +34,6 @@ class LightQueueTest extends TestCase
             $this->assertEquals(5-$key-1, \Ark4ne\LightQueue\Manager\LightQueueManager::instance()->queueSize(''));
             $this->assertEquals(json_encode($queue)."\n", $response);
         }
-
         $this->assertEquals(0, \Ark4ne\LightQueue\Manager\LightQueueManager::instance()->queueSize(''));
     }
 }

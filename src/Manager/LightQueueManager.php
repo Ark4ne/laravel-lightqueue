@@ -100,7 +100,7 @@ class LightQueueManager
      */
     public function getActiveProcess()
     {
-        return intval(exec("ps -ufxa | grep -v grep | grep 'php " . base_path() . "artisan lq:exec' | wc -l"));
+        return intval(exec("ps aux | grep -v grep | grep 'php " . base_path() . "artisan lq:exec' | wc -l"));
     }
 
     /**
