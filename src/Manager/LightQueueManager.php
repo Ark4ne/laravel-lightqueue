@@ -59,6 +59,21 @@ class LightQueueManager
         }
     }
 
+    public function setDriver($driver)
+    {
+        switch ($driver) {
+            case 'file':
+                $this->driver = 'file';
+                break;
+            case 'cache':
+            default:
+                $this->driver = 'cache';
+                break;
+        }
+
+        Config::set('queue.lightqueue.driver', $this->driver);
+    }
+
     private function provider($queue)
     {
         switch ($this->driver) {
@@ -148,9 +163,11 @@ class LightQueueManager
         return null;
     }
 
-    public function queueSize($queue){
+    public function queueSize($queue)
+    {
         return $this->queue($queue)->queueSize();
     }
+
     /**
      * Launch new job if the number of active processes is under maximum MAX_JOB_THREAD.
      *

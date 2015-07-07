@@ -35,7 +35,7 @@ class FileQueueProvider implements ProviderInterface
         $this->_file_path = Config::get('queue.lightqueue.queue_directory') . "$file_queue_name.queue";
 
         if (!file_exists($this->_file_path)) {
-            $handle = fopen($this->_file_path, 'w');
+            $handle = @fopen($this->_file_path, 'w');
             if (!$handle)
                 throw new LightQueueException("FileQueueProvider::__construct: Can't create queue file");
 
@@ -77,7 +77,7 @@ class FileQueueProvider implements ProviderInterface
      */
     private function _fHandle()
     {
-        $this->_handle = fopen($this->_file_path, "c+");
+        $this->_handle = @fopen($this->_file_path, "c+");
         if ($this->_handle) {
             $this->_fLock(LOCK_EX | LOCK_SH);
 
@@ -102,20 +102,6 @@ class FileQueueProvider implements ProviderInterface
 
             $this->_f_open = false;
         }
-    }
-
-    /**
-     * Check if queue has command
-     *
-     * @return bool
-     */
-    public function fileSize()
-    {
-        /*
-         * Clear filesize() cache
-         */
-        clearstatcache();
-        return filesize($this->_file_path);
     }
 
     /**

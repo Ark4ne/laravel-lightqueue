@@ -67,7 +67,7 @@ class LightQueue implements QueueInterface
      */
     public function pop($queue = null)
     {
-        $this->manager->nextQueue($queue);
+        return $this->manager->nextQueue($queue);
     }
 
     private static $_i;
