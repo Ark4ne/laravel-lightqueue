@@ -96,7 +96,7 @@ class LightQueueManager
      */
     private function queue($queue = null)
     {
-        if (!$queue)
+        if (is_null($queue))
             $queue = $this->queue;
         else
             $this->queue = $queue;
@@ -127,7 +127,7 @@ class LightQueueManager
      */
     public function pushQueue($job, $data, $queue = null)
     {
-        if (!$queue) {
+        if (is_null($queue)) {
             $queue = $this->queue;
         }
         try {
@@ -149,7 +149,7 @@ class LightQueueManager
      */
     public function nextQueue($queue = null)
     {
-        if (!$queue) {
+        if (is_null($queue)) {
             $queue = $this->queue;
         }
         $sQueueCmd = $this->queue($queue)->next();

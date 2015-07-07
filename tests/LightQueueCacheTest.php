@@ -13,7 +13,7 @@ class LightQueueCacheTest extends TestCase
         $this->createApplication();
 
         Artisan::add(new \Ark4ne\LightQueue\Command\LightQueueCommand());
-        
+
         LightQueueManager::instance()->setDriver('cache');
     }
 
@@ -44,6 +44,18 @@ class LightQueueCacheTest extends TestCase
             $this->assertEquals(json_encode($queue) . "\n", $response);
         }
         $this->assertEquals(0, LightQueueManager::instance()->queueSize(''));
+    }
+
+    public function testPopQueue()
+    {
+        $this->builderTestPush(function ($job, $data, $queue) {
+            LightQueue::instance()->push($job, $data, $queue);
+            $this->assertEquals((object)[
+                'job' => 'JobValid',
+                'data' => $data,
+                'queue' => $queue,
+            ], LightQueue::instance()->pop($queue));
+        }, 'JobValid');
     }
 
     public function testPushQueue()

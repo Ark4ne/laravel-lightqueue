@@ -53,6 +53,18 @@ class LightQueueFileTest extends TestCase
         }, 'JobValid'));
     }
 
+    public function testPopQueue()
+    {
+        $this->builderTestPush(function ($job, $data, $queue) {
+            LightQueue::instance()->push($job, $data, $queue);
+            $this->assertEquals((object)[
+                'job'=>'JobValid',
+                'data'=>$data,
+                'queue'=>$queue,
+            ], LightQueue::instance()->pop($queue));
+        }, 'JobValid');
+    }
+
     public function testPushRawQueue()
     {
         $this->builderExecTest($this->builderTestPush(function ($job, $data, $queue) {
