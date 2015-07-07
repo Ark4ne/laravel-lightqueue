@@ -67,17 +67,25 @@ class LightQueueManager
         Config::set('queue.lightqueue.driver', $this->driver);
     }
 
+    /**
+     * @param $queue
+     *
+     * @return ProviderInterface|null
+     */
     private function provider($queue)
     {
+        $provider = null;
         switch ($this->driver) {
             case 'file':
-                return new FileQueueProvider($queue);
+                $provider = new FileQueueProvider($queue);
                 break;
             case 'cache':
             default:
-                return new CacheQueueProvider($queue);
+                $provider = new CacheQueueProvider($queue);
                 break;
         }
+
+        return $provider;
     }
 
     /**
@@ -94,11 +102,11 @@ class LightQueueManager
         else
             $this->queue = $queue;
 
-        if (!array_key_exists($queue, $this->fileQueues))
-            $this->fileQueues[$queue] = $this->provider($queue);
+        if (!array_key_exists($this->driver . $queue, $this->fileQueues))
+            $this->fileQueues[$this->driver . $queue] = $this->provider($queue);
 
 
-        return $this->fileQueues[$queue];
+        return $this->fileQueues[$this->driver . $queue];
     }
 
     /**

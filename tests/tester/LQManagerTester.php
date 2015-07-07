@@ -16,6 +16,11 @@ abstract class LQManagerTester extends TestCase
 
     protected $queueName;
 
+    /**
+     * @var LightQueueManager
+     */
+    private $manager;
+
     public function setUp()
     {
         $this->createApplication();
@@ -24,7 +29,8 @@ abstract class LQManagerTester extends TestCase
 
         $this->setUpConfig();
 
-        LightQueueManager::instance($this->driver)->setDriver($this->driver);
+        $this->manager = LightQueueManager::instance($this->driver);
+        $this->manager->setDriver($this->driver);
     }
 
 
@@ -44,17 +50,17 @@ abstract class LQManagerTester extends TestCase
 
     public function builderExecTest($queueTest)
     {
-        $this->assertEquals(5, LightQueueManager::instance()->queueSize($this->queueName));
+        $this->assertEquals(5, $this->manager->queueSize($this->queueName));
 
         foreach ($queueTest as $key => $data) {
             $output = new BufferedOutput();
 
             Artisan::call('lq:exec', [], $output);
             $response = $output->fetch();
-            $this->assertEquals(5 - $key - 1, LightQueueManager::instance()->queueSize($this->queueName));
+            $this->assertEquals(5 - $key - 1, $this->manager->queueSize($this->queueName));
             $this->assertEquals(json_encode($data) . "\n", $response);
         }
-        $this->assertEquals(0, LightQueueManager::instance()->queueSize($this->queueName));
+        $this->assertEquals(0, $this->manager->queueSize($this->queueName));
     }
 
     public function testPopQueue()
@@ -94,7 +100,7 @@ abstract class LQManagerTester extends TestCase
     {
         $job = 'JobError';
         LightQueue::instance()->push($job, ['data' => 'test'], $this->queueName);
-        $this->assertEquals(1, LightQueueManager::instance()->queueSize($this->queueName));
+        $this->assertEquals(1, $this->manager->queueSize($this->queueName));
 
         $output = new BufferedOutput();
         $this->setExpectedException('Ark4ne\LightQueue\Exception\LightQueueException', 'JobError not implement LightQueueCommandInterface');
@@ -105,17 +111,17 @@ abstract class LQManagerTester extends TestCase
 
     public function testNullQueueName()
     {
-        LightQueueManager::instance()->pushQueue('JobValid', 'DataQueueNull');
+        $this->manager->pushQueue('JobValid', 'DataQueueNull');
 
         $this->assertEquals((object)[
             'job' => 'JobValid',
             'data' => 'DataQueueNull',
-            'queue' => 'process'], LightQueueManager::instance()->nextQueue());
+            'queue' => 'process'], $this->manager->nextQueue());
     }
 
     public function testNullNextQueue()
     {
-        $this->assertNull(LightQueueManager::instance()->nextQueue());
+        $this->assertNull($this->manager->nextQueue());
 
         switch ($this->driver) {
             case 'file':
@@ -129,13 +135,13 @@ abstract class LQManagerTester extends TestCase
 
         $provider->push('dezzfzfz');
 
-        $this->assertNull(LightQueueManager::instance()->nextQueue());
+        $this->assertNull($this->manager->nextQueue());
     }
 
     public function testExec()
     {
-        $this->assertNull(LightQueueManager::instance()->nextQueue());
+        $this->assertNull($this->manager->nextQueue());
 
-        $this->assertFalse(LightQueueManager::instance()->createProcess(null));
+        $this->assertFalse($this->manager->createProcess(null));
     }
 }

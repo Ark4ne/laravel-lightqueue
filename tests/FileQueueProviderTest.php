@@ -20,7 +20,7 @@ class FileQueueProviderTest extends LQProviderTester
 
     public function testFileHandleException()
     {
-        $this->setExpectedException('Ark4ne\LightQueue\Exception\LightQueueException', "FileQueueProvider::__construct: Can't create queue file");
+        $this->setExpectedException('Ark4ne\LightQueue\Exception\LightQueueException', "FileLockable::__construct: Can't create queue file");
         $directory = Config::get('queue.lightqueue.queue_directory');
         Config::set('queue.lightqueue.queue_directory', 'Wrong/Directory/Path/');
         $fileQueue = new FileQueueProvider('te/feg/hhth/ht/htrt');
