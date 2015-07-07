@@ -72,7 +72,7 @@ class LightQueueCommand extends Command
     public function fire()
     {
         $this->queue = @$this->option('queue');
-
+        if (!$this->queue) $this->queue = 'process';
         $this->cmd = LightQueueManager::instance()->nextQueue($this->queue);
 
         if ($this->isValidCmd($this->cmd)) {
@@ -82,9 +82,8 @@ class LightQueueCommand extends Command
                 $job->fire($this, $this->cmd->data);
             else
                 throw new LightQueueException("{$this->cmd->job} not implement LightQueueCommandInterface");
-        }
-
-        throw new LightQueueException("LightQueueCommand data invalid");
+        } else
+            throw new LightQueueException("LightQueueCommand data invalid");
     }
 
     public function __destruct()

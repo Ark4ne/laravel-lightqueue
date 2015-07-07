@@ -8,6 +8,9 @@ use Symfony\Component\Console\Output\BufferedOutput;
 
 class LightQueueCacheTest extends TestCase
 {
+
+    private $queueName = "process";
+
     public function setUp()
     {
         $this->createApplication();
@@ -24,8 +27,8 @@ class LightQueueCacheTest extends TestCase
         for ($i = 0, $length = 5; $i < $length; $i++)
             $queueTest[] = (object)['data' => 'test.' . $i];
 
-        foreach ($queueTest as $key => $queue) {
-            $_func_lightQueue($jobName, $queue, '');
+        foreach ($queueTest as $key => $data) {
+            $_func_lightQueue($jobName, $data, $this->queueName);
         }
 
         return $queueTest;
@@ -33,17 +36,17 @@ class LightQueueCacheTest extends TestCase
 
     public function builderExecTest($queueTest)
     {
-        $this->assertEquals(5, LightQueueManager::instance()->queueSize(''));
+        $this->assertEquals(5, LightQueueManager::instance()->queueSize($this->queueName));
 
-        foreach ($queueTest as $key => $queue) {
+        foreach ($queueTest as $key => $data) {
             $output = new BufferedOutput();
 
             Artisan::call('lq:exec', [], $output);
             $response = $output->fetch();
-            $this->assertEquals(5 - $key - 1, LightQueueManager::instance()->queueSize(''));
-            $this->assertEquals(json_encode($queue) . "\n", $response);
+            $this->assertEquals(5 - $key - 1, LightQueueManager::instance()->queueSize($this->queueName));
+            $this->assertEquals(json_encode($data) . "\n", $response);
         }
-        $this->assertEquals(0, LightQueueManager::instance()->queueSize(''));
+        $this->assertEquals(0, LightQueueManager::instance()->queueSize($this->queueName));
     }
 
     public function testPopQueue()
@@ -53,7 +56,7 @@ class LightQueueCacheTest extends TestCase
             $this->assertEquals((object)[
                 'job' => 'JobValid',
                 'data' => $data,
-                'queue' => $queue,
+                'queue' => $this->queueName,
             ], LightQueue::instance()->pop($queue));
         }, 'JobValid');
     }

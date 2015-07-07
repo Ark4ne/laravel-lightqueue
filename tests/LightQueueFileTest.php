@@ -8,6 +8,8 @@ use Symfony\Component\Console\Output\BufferedOutput;
 
 class LightQueueFileTest extends TestCase
 {
+    private $queueName = "process";
+
     public function setUp()
     {
         $this->createApplication();
@@ -19,31 +21,31 @@ class LightQueueFileTest extends TestCase
 
     public function builderTestPush($_func_lightQueue, $jobName)
     {
-        $queueTest = [];
+        $dataTest = [];
 
         for ($i = 0, $length = 5; $i < $length; $i++)
-            $queueTest[] = (object)['data' => 'test.' . $i];
+            $dataTest[] = (object)['data' => 'test.' . $i];
 
-        foreach ($queueTest as $key => $queue) {
-            $_func_lightQueue($jobName, $queue, '');
+        foreach ($dataTest as $key => $data) {
+            $_func_lightQueue($jobName, $data, $this->queueName);
         }
 
-        return $queueTest;
+        return $dataTest;
     }
 
     public function builderExecTest($queueTest)
     {
-        $this->assertEquals(5, LightQueueManager::instance()->queueSize(''));
+        $this->assertEquals(5, LightQueueManager::instance()->queueSize($this->queueName));
 
         foreach ($queueTest as $key => $queue) {
             $output = new BufferedOutput();
 
             Artisan::call('lq:exec', [], $output);
             $response = $output->fetch();
-            $this->assertEquals(5 - $key - 1, LightQueueManager::instance()->queueSize(''));
+            $this->assertEquals(5 - $key - 1, LightQueueManager::instance()->queueSize($this->queueName));
             $this->assertEquals(json_encode($queue) . "\n", $response);
         }
-        $this->assertEquals(0, LightQueueManager::instance()->queueSize(''));
+        $this->assertEquals(0, LightQueueManager::instance()->queueSize($this->queueName));
     }
 
     public function testPushQueue()
@@ -60,7 +62,7 @@ class LightQueueFileTest extends TestCase
             $this->assertEquals((object)[
                 'job'=>'JobValid',
                 'data'=>$data,
-                'queue'=>$queue,
+                'queue'=>$this->queueName,
             ], LightQueue::instance()->pop($queue));
         }, 'JobValid');
     }
@@ -82,8 +84,8 @@ class LightQueueFileTest extends TestCase
     public function testExceptionJob()
     {
         $job = 'JobError';
-        LightQueue::instance()->push($job, ['data' => 'test'], '');
-        $this->assertEquals(1, LightQueueManager::instance()->queueSize(''));
+        LightQueue::instance()->push($job, ['data' => 'test'], $this->queueName);
+        $this->assertEquals(1, LightQueueManager::instance()->queueSize($this->queueName));
         $output = new BufferedOutput();
         $this->setExpectedException('Ark4ne\LightQueue\Exception\LightQueueException');
         Artisan::call('lq:exec', [], $output);
