@@ -16,12 +16,13 @@ class FileQueueTest extends TestCase
         $fileQueue = new FileQueue('test');
 
         $string_test = "string_test";
+        $string_len_test = strlen($string_test.PHP_EOL);
 
         $this->assertEquals(0, $fileQueue->fileSize());
 
         $this->assertTrue($fileQueue->push($string_test));
 
-        $this->assertEquals(13, $fileQueue->fileSize());
+        $this->assertEquals($string_len_test, $fileQueue->fileSize());
 
         $this->assertTrue($fileQueue->hasNext());
 
