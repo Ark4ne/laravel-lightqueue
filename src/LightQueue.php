@@ -9,6 +9,17 @@ class LightQueue implements QueueInterface
 {
 
     /**
+     * @var LightQueueManager
+     */
+    private $manager;
+
+    private function __construct()
+    {
+        $this->manager = LightQueueManager::instance();
+    }
+
+
+    /**
      * Push a new job onto the queue.
      *
      * @param  string $job
@@ -18,7 +29,7 @@ class LightQueue implements QueueInterface
      */
     public function push($job, $data = null, $queue = null)
     {
-        LightQueueManager::instance()->pushQueue($job, $data, $queue);
+        $this->manager->pushQueue($job, $data, $queue);
     }
 
     /**
@@ -31,7 +42,7 @@ class LightQueue implements QueueInterface
      */
     public function pushRaw($payload, $queue = null, array $options = array())
     {
-        // TODO: Implement pushRaw() method.
+        $this->push($payload, $options, $queue);
     }
 
     /**
@@ -45,7 +56,7 @@ class LightQueue implements QueueInterface
      */
     public function later($delay, $job, $data = '', $queue = null)
     {
-        LightQueueManager::instance()->pushQueue($job, $data, $queue);
+        $this->push($job, $data, $queue);
     }
 
     /**
@@ -56,7 +67,7 @@ class LightQueue implements QueueInterface
      */
     public function pop($queue = null)
     {
-        LightQueueManager::instance()->nextQueue($queue);
+        $this->manager->nextQueue($queue);
     }
 
     private static $_i;

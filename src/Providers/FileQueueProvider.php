@@ -2,7 +2,7 @@
 
 namespace Ark4ne\LightQueue\Provider;
 
-use Ark4ne\LightQueue\LightQueueException;
+use Ark4ne\LightQueue\Exception\LightQueueException;
 use Illuminate\Support\Facades\Config;
 
 class FileQueueProvider implements ProviderInterface
@@ -34,11 +34,11 @@ class FileQueueProvider implements ProviderInterface
     {
         $this->_file_path = Config::get('queue.lightqueue.queue_directory') . "$file_queue_name.queue";
 
-        if(!file_exists($this->_file_path)){
+        if (!file_exists($this->_file_path)) {
             $handle = fopen($this->_file_path, 'w');
-            if(!$handle){
+            if (!$handle)
                 throw new LightQueueException("FileQueueProvider::__construct: Can't create queue file");
-            }
+
             fclose($handle);
         }
     }
@@ -54,6 +54,22 @@ class FileQueueProvider implements ProviderInterface
     }
 
     /**
+     * Got Lock for handle
+     *
+     * @param int $option
+     * @throws LightQueueException
+     */
+    private function _fLock($option = LOCK_UN)
+    {
+        $wouldblock = true;
+        while (!flock($this->_handle, $option, $wouldblock)) {
+            if (!$wouldblock)
+                throw new LightQueueException("FileQueueProvider::_fHandle: Can't got lock for queue file !");
+            usleep(10);
+        }
+    }
+
+    /**
      * Open queue file and lock it.
      *
      * @return resource
@@ -61,16 +77,11 @@ class FileQueueProvider implements ProviderInterface
      */
     private function _fHandle()
     {
-        $wouldblock = true;
         $this->_handle = fopen($this->_file_path, "c+");
         if ($this->_handle) {
-            while (!flock($this->_handle, LOCK_EX | LOCK_SH, $wouldblock)) {
-                if (!$wouldblock)
-                    throw new LightQueueException("FileQueueProvider::_fHandle: Can't got lock for queue file !");
-                usleep(10);
-            }
-            $this->_f_open = true;
+            $this->_fLock(LOCK_EX | LOCK_SH);
 
+            $this->_f_open = true;
             return $this->_handle;
         }
 
@@ -84,16 +95,10 @@ class FileQueueProvider implements ProviderInterface
      */
     private function _fClose()
     {
-        $wouldblock = true;
         if ($this->_f_open) {
-            while (!flock($this->_handle, LOCK_UN, $wouldblock)) {
-                if (!$wouldblock)
-                    throw new LightQueueException("FileQueueProvider::_fClose: Can't unlock queue file !");
-                usleep(10);
-            }
-            if (!fclose($this->_handle)) {
+            $this->_fLock(LOCK_UN);
+            if (!fclose($this->_handle))
                 throw new LightQueueException("FileQueueProvider::_fClose: Can't close queue file");
-            }
 
             $this->_f_open = false;
         }
