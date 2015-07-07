@@ -35,7 +35,8 @@
       "Ark4ne\\LightQueue\\": "src/"
     },
     "classmap": [
-      "tests/TestCase.php"
+      "tests/TestCase.php",
+      "tests/models/"
     ]
   },
   "minimum-stability": "dev",

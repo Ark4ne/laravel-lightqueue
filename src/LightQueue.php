@@ -4,7 +4,8 @@ namespace Ark4ne\LightQueue;
 
 use Illuminate\Queue\QueueInterface;
 
-class LightQueue implements QueueInterface{
+class LightQueue implements QueueInterface
+{
 
     /**
      * Push a new job onto the queue.
@@ -14,7 +15,7 @@ class LightQueue implements QueueInterface{
      * @param  string $queue
      * @return mixed
      */
-    public function push($job, $data = '', $queue = null)
+    public function push($job, $data = null, $queue = null)
     {
         LightQueueManager::instance()->pushQueue($job, $data, $queue);
     }
@@ -57,5 +58,13 @@ class LightQueue implements QueueInterface{
         LightQueueManager::instance()->nextQueue($queue);
     }
 
+    private static $_i;
 
+    public static function instance()
+    {
+        if (self::$_i == null)
+            self::$_i = new LightQueue();
+
+        return self::$_i;
+    }
 }

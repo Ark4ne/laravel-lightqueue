@@ -2,6 +2,10 @@
 
 namespace Ark4ne\LightQueue;
 
+use Ark4ne\LightQueue\Provider\CacheQueueProvider;
+use Ark4ne\LightQueue\Provider\FileQueueProvider;
+use Illuminate\Support\Facades\Config;
+
 class LightQueueManager
 {
 
@@ -25,6 +29,16 @@ class LightQueueManager
      * @var string
      */
     private $queue = 'process';
+
+    /**
+     * @var int
+     */
+    private $max_processes;
+
+    /**
+     * @var string
+     */
+    private $driver;
     /**
      * @var array
      */
@@ -32,14 +46,37 @@ class LightQueueManager
 
     private function __construct()
     {
+        $this->max_processes = Config::get('queue.lightqueue.processes.max_by_queue');
+        switch (Config::get('queue.lightqueue.driver')) {
+            case 'file':
+                $this->driver = 'file';
+                break;
+            case 'cache':
+            default:
+                $this->driver = 'cache';
+                break;
+        }
+    }
+
+    private function provider($queue)
+    {
+        switch ($this->driver) {
+            case 'file':
+                return new FileQueueProvider($queue);
+                break;
+            case 'cache':
+            default:
+                return new CacheQueueProvider($queue);
+                break;
+        }
     }
 
     /**
-     * Get FileQueue by queue name.
+     * Get FileQueueProvider by queue name.
      *
      * @param null|string $queue
      *
-     * @return FileQueue
+     * @return FileQueueProvider
      */
     private function queue($queue = null)
     {
@@ -49,7 +86,7 @@ class LightQueueManager
             $this->queue = $queue;
 
         if (!array_key_exists($queue, $this->fileQueues))
-            $this->fileQueues[$queue] = new  FileQueue($queue);
+            $this->fileQueues[$queue] = $this->provider($queue);
 
 
         return $this->fileQueues[$queue];
@@ -117,8 +154,8 @@ class LightQueueManager
      */
     public function createProcess($queue)
     {
-        if ($this->getActiveProcess() < 8) {
-            exec('php ' . base_path() . '/artisan lq:exec --queue="'.$queue.'"> /dev/null &');
+        if ($this->getActiveProcess() < $this->max_processes) {
+            exec('php ' . base_path() . '/artisan lq:exec --queue="' . $queue . '"> /dev/null &');
         }
     }
 

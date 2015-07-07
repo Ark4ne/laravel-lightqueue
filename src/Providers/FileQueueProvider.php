@@ -1,10 +1,11 @@
 <?php
 
-namespace Ark4ne\LightQueue;
+namespace Ark4ne\LightQueue\Provider;
 
+use Ark4ne\LightQueue\LightQueueException;
 use Illuminate\Support\Facades\Config;
 
-class FileQueue
+class FileQueueProvider implements ProviderInterface
 {
     /**
      * Path for queue file
@@ -14,7 +15,7 @@ class FileQueue
     private $_file_path;
 
     /**
-     * Use for check if queue file is always open when FileQueue is destruct
+     * Use for check if queue file is always open when FileQueueProvider is destruct
      *
      * @var bool
      */
@@ -36,10 +37,20 @@ class FileQueue
         if(!file_exists($this->_file_path)){
             $handle = fopen($this->_file_path, 'w');
             if(!$handle){
-                throw new LightQueueException("FileQueue::__construct: Can't create queue file");
+                throw new LightQueueException("FileQueueProvider::__construct: Can't create queue file");
             }
             fclose($handle);
         }
+    }
+
+    /**
+     * Get size of queue
+     *
+     * @return int
+     */
+    public function queueSize()
+    {
+        return count(file($this->_file_path));
     }
 
     /**
@@ -55,7 +66,7 @@ class FileQueue
         if ($this->_handle) {
             while (!flock($this->_handle, LOCK_EX | LOCK_SH, $wouldblock)) {
                 if (!$wouldblock)
-                    throw new LightQueueException("FileQueue::_fHandle: Can't got lock for queue file !");
+                    throw new LightQueueException("FileQueueProvider::_fHandle: Can't got lock for queue file !");
                 usleep(10);
             }
             $this->_f_open = true;
@@ -63,7 +74,7 @@ class FileQueue
             return $this->_handle;
         }
 
-        throw new LightQueueException("FileQueue::_fHandle: Can't open queue file");
+        throw new LightQueueException("FileQueueProvider::_fHandle: Can't open queue file");
     }
 
     /**
@@ -77,15 +88,29 @@ class FileQueue
         if ($this->_f_open) {
             while (!flock($this->_handle, LOCK_UN, $wouldblock)) {
                 if (!$wouldblock)
-                    throw new LightQueueException("FileQueue::_fClose: Can't unlock queue file !");
+                    throw new LightQueueException("FileQueueProvider::_fClose: Can't unlock queue file !");
                 usleep(10);
             }
             if (!fclose($this->_handle)) {
-                throw new LightQueueException("FileQueue::_fClose: Can't close queue file");
+                throw new LightQueueException("FileQueueProvider::_fClose: Can't close queue file");
             }
 
             $this->_f_open = false;
         }
+    }
+
+    /**
+     * Check if queue has command
+     *
+     * @return bool
+     */
+    public function fileSize()
+    {
+        /*
+         * Clear filesize() cache
+         */
+        clearstatcache();
+        return filesize($this->_file_path);
     }
 
     /**
@@ -128,19 +153,9 @@ class FileQueue
      */
     public function hasNext()
     {
-        return $this->fileSize($this->_file_path) > 1;
+        return $this->queueSize() > 0;
     }
 
-    /**
-     * Check if queue has command
-     *
-     * @return bool
-     */
-    public function fileSize()
-    {
-        clearstatcache();
-        return filesize($this->_file_path);
-    }
 
     /**
      * Get the next command in queue

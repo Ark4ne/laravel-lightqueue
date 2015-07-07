@@ -105,6 +105,6 @@ class LightQueueCommand extends Command
      */
     protected function getOptions()
     {
-        return [['queue', 'q', InputOption::VALUE_OPTIONAL, 'Queue name', null]];
+        return [['queue',null, InputOption::VALUE_OPTIONAL, 'Queue name', null]];
     }
 }
