@@ -31,6 +31,9 @@
     }
   },
   "autoload-dev": {
+    "psr-4": {
+      "Ark4ne\\LightQueue\\": "src/"
+    },
     "classmap": [
       "tests/TestCase.php"
     ]
