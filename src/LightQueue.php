@@ -18,7 +18,6 @@ class LightQueue implements QueueInterface
         $this->manager = LightQueueManager::instance();
     }
 
-
     /**
      * Push a new job onto the queue.
      *

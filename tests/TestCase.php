@@ -28,7 +28,7 @@ class TestCase extends Orchestra\Testbench\TestCase {
         $config = require 'config/queue.php';
 
         // overwrite database configuration
-        $app['config']->set('queue.lightqueue.queue_directory', $config['ligthqueue']['queue_directory']);
+        $app['config']->set('queue.lightqueue.queue_directory', $config['lightqueue']['queue_directory']);
 
         // overwrite cache configuration
         $app['config']->set('cache.driver', 'array');

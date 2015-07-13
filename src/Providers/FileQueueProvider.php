@@ -7,266 +7,281 @@ use Illuminate\Support\Facades\Config;
 
 class FileLockable
 {
-    /**
-     * @var resource
-     */
-    private $handle;
 
-    /**
-     * @var bool
-     */
-    private $open;
+	/**
+	 * @var resource
+	 */
+	private $handle;
 
-    /**
-     * @var bool
-     */
-    private $lock;
+	/**
+	 * @var bool
+	 */
+	private $open;
 
-    /**
-     * @var string
-     */
-    public $path;
+	/**
+	 * @var bool
+	 */
+	private $lock;
 
-    /**
-     * @param $path string
-     *
-     * @throws LightQueueException
-     */
-    public function __construct($path)
-    {
-        $this->open = false;
-        $this->lock = false;
-        $this->path = $path;
+	/**
+	 * @var string
+	 */
+	public $path;
 
-        if (!file_exists($this->path)) {
-            $handle = @fopen($this->path, 'w');
-            if (!$handle) {
-                throw new LightQueueException("FileLockable::__construct: Can't create queue file");
-            }
+	/**
+	 * @return string
+	 */
+	public function getPath()
+	{
+		return $this->path;
+	}
 
-            fclose($handle);
-        }
-    }
+	/**
+	 * @param $path string
+	 *
+	 * @throws LightQueueException
+	 */
+	public function __construct($path)
+	{
+		$this->open = false;
+		$this->lock = false;
+		$this->path = $path;
 
-    /**
-     * Call flock for handle.
-     *
-     * @param $option
-     *
-     * @throws LightQueueException
-     */
-    private function _flock($option)
-    {
-        $try = 0;
-        $maxTry = 25;
+		if (!file_exists($this->path)) {
+			$handle = @fopen($this->path, 'w');
+			if (!$handle) {
+				throw new LightQueueException("FileLockable::__construct: Can't create queue file");
+			}
 
-        $wouldblock = true;
-        while (!flock($this->handle, $option | LOCK_NB, $wouldblock)) {
-            if (($try > $maxTry) || !$wouldblock) {
-                throw new LightQueueException("FileLockable::_flock: Can't got lock for queue file !");
-            }
-            usleep(10);
-            $try++;
-        }
-    }
+			fclose($handle);
+		}
+	}
 
-    public function handle()
-    {
-        if (!$this->isOpen()) {
-            $this->handle = @fopen($this->path, 'c+');
-            if ($this->handle) {
-                $this->open = true;
-                return $this->handle;
-            }
-        } else {
-            return $this->handle;
-        }
+	/**
+	 * Call flock for handle.
+	 *
+	 * @param $option
+	 *
+	 * @throws LightQueueException
+	 */
+	private function _flock($option)
+	{
+		$try    = 0;
+		$maxTry = 25;
 
-        throw new LightQueueException("FileLockable::_fHandle: Can't open queue file");
+		$wouldblock = true;
+		while (!flock($this->handle, $option | LOCK_NB, $wouldblock)) {
+			if (($try > $maxTry) || !$wouldblock) {
+				throw new LightQueueException("FileLockable::_flock: Can't got lock for queue file !");
+			}
+			usleep(10);
+			$try++;
+		}
+	}
 
-    }
+	public function handle()
+	{
+		if (!$this->isOpen()) {
+			$this->handle = @fopen($this->path, 'c+');
+			if ($this->handle) {
+				$this->open = true;
 
-    /**
-     * @return bool
-     */
-    public function isLock()
-    {
-        return $this->lock;
-    }
+				return $this->handle;
+			}
+		}
+		else {
+			return $this->handle;
+		}
 
-    /**
-     * @return bool
-     */
-    public function isOpen()
-    {
-        return $this->open;
-    }
+		throw new LightQueueException("FileLockable::_fHandle: Can't open queue file");
+	}
 
-    /**
-     * Lock handle.
-     *
-     * @throws LightQueueException
-     */
-    public function lock()
-    {
-        if ($this->isOpen() && !$this->isLock()) {
-            $this->_flock(LOCK_EX);
+	/**
+	 * @return bool
+	 */
+	public function isLock()
+	{
+		return $this->lock;
+	}
 
-            $this->lock = true;
+	/**
+	 * @return bool
+	 */
+	public function isOpen()
+	{
+		return $this->open;
+	}
 
-            return true;
-        }
+	/**
+	 * Lock handle.
+	 * @throws LightQueueException
+	 */
+	public function lock()
+	{
+		if ($this->isOpen() && !$this->isLock()) {
+			$this->_flock(LOCK_EX);
 
-        return false;
-    }
+			$this->lock = true;
 
-    /**
-     * UnLock handle.
-     *
-     * @throws LightQueueException
-     */
-    public function unlock()
-    {
-        if ($this->isOpen() && $this->isLock()) {
-            $this->_flock(LOCK_UN);
+			return true;
+		}
 
-            $this->lock = false;
+		return false;
+	}
 
-            return true;
-        }
+	/**
+	 * UnLock handle.
+	 * @throws LightQueueException
+	 */
+	public function unlock()
+	{
+		if ($this->isOpen() && $this->isLock()) {
+			$this->_flock(LOCK_UN);
 
-        return false;
-    }
+			$this->lock = false;
 
-    /**
-     * UnLock queue file and close it.
-     *
-     * @throws LightQueueException
-     */
-    public function close()
-    {
-        if ($this->isOpen()) {
-            $this->unlock();
+			return true;
+		}
 
-            if (!fclose($this->handle)) {
-                throw new LightQueueException("FileLockable::_fClose: Can't close queue file");
-            }
+		return false;
+	}
 
-            $this->open = false;
-        }
-    }
+	/**
+	 * UnLock queue file and close it.
+	 * @throws LightQueueException
+	 */
+	public function close()
+	{
+		if ($this->isOpen()) {
+			$this->unlock();
 
-    /**
-     *  Close handle if is already open.
-     */
-    public function __destruct()
-    {
-        $this->close();
-    }
+			if (!fclose($this->handle)) {
+				throw new LightQueueException("FileLockable::_fClose: Can't close queue file");
+			}
+
+			$this->open = false;
+		}
+	}
+
+	/**
+	 *  Close handle if is already open.
+	 */
+	public function __destruct()
+	{
+		$this->close();
+	}
 }
 
 class FileQueueProvider implements ProviderInterface
 {
-    /**
-     * @var FileLockable
-     */
-    private $file;
 
-    /**
-     * @param string $file_queue_name Name of queue
-     *
-     * @throws LightQueueException
-     */
-    public function __construct($file_queue_name)
-    {
-        $this->file = new FileLockable(Config::get('queue.lightqueue.queue_directory') . md5($file_queue_name) . ".queue");
-    }
+	/**
+	 * @var FileLockable
+	 */
+	private $file;
 
-    /**
-     * Get size of queue.
-     *
-     * @return int
-     */
-    public function queueSize()
-    {
-        return count(file($this->file->path));
-    }
+	/**
+	 * @return FileLockable
+	 */
+	public function getFile()
+	{
+		return $this->file;
+	}
 
-    /**
-     *  Close handle if is already open.
-     */
-    public function __destruct()
-    {
-        $this->file->close();
-    }
+	/**
+	 * @param string $file_queue_name Name of queue
+	 *
+	 * @throws LightQueueException
+	 */
+	public function __construct($file_queue_name)
+	{
+		$this->file = new FileLockable(Config::get('queue.lightqueue.queue_directory') . md5($file_queue_name) . ".queue");
+	}
 
-    /**
-     * Push Command to queue.
-     *
-     * @param $cmd
-     *
-     * @return bool
-     */
-    public function push($cmd)
-    {
-        try {
-            $handle = $this->file->handle();
+	/**
+	 * Get size of queue.
+	 * @return int
+	 */
+	public function queueSize()
+	{
+		return count(file($this->file->path));
+	}
 
-            fseek($handle, 0, SEEK_END);
+	/**
+	 *  Close handle if is already open.
+	 */
+	public function __destruct()
+	{
+		$this->file->close();
+	}
 
-            fwrite($handle, $cmd . PHP_EOL, strlen($cmd . PHP_EOL));
-            fflush($handle);
+	/**
+	 * Push Command to queue.
+	 *
+	 * @param $cmd
+	 *
+	 * @return bool
+	 */
+	public function push($cmd)
+	{
+		try {
+			$handle = $this->file->handle();
+			$this->file->lock();
 
-            $this->file->close();
+			fseek($handle, 0, SEEK_END);
 
-            return true;
-        } catch (LightQueueException $lqe) {
-            return false;
-        }
-    }
+			fwrite($handle, $cmd . PHP_EOL, strlen($cmd . PHP_EOL));
+			fflush($handle);
 
-    /**
-     * Check if queue has command.
-     *
-     * @return bool
-     */
-    public function hasNext()
-    {
-        return $this->queueSize() > 0;
-    }
+			$this->file->close();
 
+			return true;
+		}
+		catch (LightQueueException $lqe) {
+			return false;
+		}
+	}
 
-    /**
-     * Get the next command in queue.
-     *
-     * @return string
-     */
-    public function next()
-    {
-        $line = null;
-        try {
-            $lines = file($this->file->path, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
-            if (count($lines) > 0) {
-                if ($this->file->handle()) {
-                    rewind($this->file->handle());
-                    ftruncate($this->file->handle(), 0);
-                    $line = $lines[0];
-                    for ($i = 1, $lenght = count($lines); $i < $lenght; $i++) {
-                        $_line = $lines[$i] . PHP_EOL;
-                        $_l_line = strlen($_line);
-                        if ($_l_line) {
-                            fwrite($this->file->handle(), $_line, $_l_line);
-                        }
-                    }
+	/**
+	 * Check if queue has command.
+	 * @return bool
+	 */
+	public function hasNext()
+	{
+		return $this->queueSize() > 0;
+	}
 
-                    fflush($this->file->handle());
-                    $this->file->close();
-                }
-            }
-        } catch (\Exception $lqe) {
-            $line = null;
-        }
+	/**
+	 * Get the next command in queue.
+	 * @return string
+	 */
+	public function next()
+	{
+		$line = null;
+		try {
+			$lines = file($this->file->path, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
+			if (count($lines) > 0) {
+				if ($this->file->handle() && $this->file->lock()) {
+					rewind($this->file->handle());
+					ftruncate($this->file->handle(), 0);
+					$line = $lines[0];
+					for ($i = 1, $lenght = count($lines); $i < $lenght; $i++) {
+						$_line   = $lines[$i] . PHP_EOL;
+						$_l_line = strlen($_line);
+						if ($_l_line) {
+							fwrite($this->file->handle(), $_line, $_l_line);
+						}
+					}
 
-        return $line;
-    }
+					fflush($this->file->handle());
+					$this->file->close();
+				}
+			}
+		}
+		catch (\Exception $lqe) {
+			$line = null;
+		}
+
+		return $line;
+	}
 }

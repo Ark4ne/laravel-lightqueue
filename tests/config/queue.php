@@ -1,6 +1,6 @@
 <?php
 return [
-    'ligthqueue' => [
+    'lightqueue' => [
         "driver" => "file",
         "processes" => [
             "max_by_queue" => 4

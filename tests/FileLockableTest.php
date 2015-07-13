@@ -20,7 +20,6 @@ class FileLockableTest extends TestCase
         $this->assertFalse($file->isLock());
 
         $this->assertNotNull($file->handle());
-        $this->assertNotNull($file->handle());
 
         $this->assertTrue($file->lock());
 
@@ -33,8 +32,7 @@ class FileLockableTest extends TestCase
         $this->assertTrue($file->unlock());
 
         $file->close();
-
-    }
+	}
 
     public function testLocker()
     {
